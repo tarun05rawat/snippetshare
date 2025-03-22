@@ -3,6 +3,8 @@
 import * as vscode from 'vscode';
 import { createSnippetCommand } from './commands/createSnippet';
 import { SnippetProvider } from './tree/snippetProvider';
+import { SnippetPanel } from './webviews/SnippetPanel';
+
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -39,6 +41,14 @@ export function activate(context: vscode.ExtensionContext) {
 		  }
 		})
 	  );
+	  context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(
+		  SnippetPanel.viewType,
+		  new SnippetPanel(context)
+		)
+	  );
+	  
+	  
 	  
 }
 

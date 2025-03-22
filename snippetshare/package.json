@@ -6,38 +6,45 @@
   "engines": {
     "vscode": "^1.98.0"
   },
-  "categories": [
-    "Other"
-  ],
+  "categories": ["Other"],
   "activationEvents": [
-  "onCommand:snippetshare.createSnippet",
-  "onView:snippetExplorer"
-],
+    "onCommand:snippetshare.createSnippet",
+    "onView:snippetshare.snippetPanel"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
-  "commands": [
-    {
-      "command": "snippetshare.createSnippet",
-      "title": "Create Snippet from Selection"
+    "commands": [
+      {
+        "command": "snippetshare.createSnippet",
+        "title": "Create Snippet from Selection"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "snippetshare.createSnippet",
+        "key": "cmd+alt+s",
+        "when": "editorTextFocus"
+      }
+    ],
+    "viewsContainers": {
+      "secondarySidebar": [
+        {
+          "id": "snippetshareSidebar",
+          "title": "SnippetShare",
+          "icon": "resources/snippet-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "snippetshareSidebar": [
+        {
+          "type": "webview",
+          "id": "snippetshare.snippetPanel",
+          "name": "Snippets"
+        }
+      ]
     }
-  ],
-  "keybindings": [
-    {
-      "command": "snippetshare.createSnippet",
-      "key": "cmd+alt+s",
-      "when": "editorTextFocus"
-    }
-  ],
-  "views": {
-  "explorer": [
-    {
-      "id": "snippetExplorer",
-      "name": "Snippets"
-    }
-  ]
-}
-
-},
+  },
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "npm run check-types && npm run lint && node esbuild.js",

@@ -10,7 +10,8 @@
     "Other"
   ],
   "activationEvents": [
-  "onCommand:snippetshare.createSnippet"
+  "onCommand:snippetshare.createSnippet",
+  "onView:snippetExplorer"
 ],
   "main": "./dist/extension.js",
   "contributes": {

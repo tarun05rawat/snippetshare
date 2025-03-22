@@ -27,6 +27,19 @@ export function activate(context: vscode.ExtensionContext) {
 	  context.subscriptions.push(
 		vscode.window.registerTreeDataProvider('snippetExplorer', snippetProvider)
 	  );	  
+	  context.subscriptions.push(
+		vscode.commands.registerCommand('snippetshare.insertSnippet', (code: string) => {
+		  const editor = vscode.window.activeTextEditor;
+		  if (editor) {
+			editor.edit(editBuilder => {
+			  editBuilder.insert(editor.selection.active, code);
+			});
+		  } else {
+			vscode.window.showErrorMessage('No active text editor found.');
+		  }
+		})
+	  );
+	  
 }
 
 // This method is called when your extension is deactivated

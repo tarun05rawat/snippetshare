@@ -22,7 +22,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('snippetshare.createSnippet', createSnippetCommand)
 	  );
-	context.subscriptions.push(disposable);
 }
 
 // This method is called when your extension is deactivated

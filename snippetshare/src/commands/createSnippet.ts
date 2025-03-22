@@ -41,3 +41,4 @@ export async function createSnippetCommand() {
 
   vscode.window.showInformationMessage(`Snippet "${title}" created 🎉`);
 }
+

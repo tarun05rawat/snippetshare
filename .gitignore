@@ -1,0 +1,23 @@
+# .gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environment
+venv/
+env/
+
+# Mac system files
+.DS_Store
+
+# Secrets & config
+serviceAccountKey.json
+snippetshare-service-account.json
+firebase_admin_setup.py
+.env
+firebase_admin_setup.cpython-313.pyc
+
+
+*.pyc

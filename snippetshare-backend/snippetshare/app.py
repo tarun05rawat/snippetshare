@@ -26,8 +26,6 @@ def firebase_token_required(f):
 
 
 
-
-
 # Create a workspace
 @app.route("/api/workspaces", methods=["POST"])
 @firebase_token_required

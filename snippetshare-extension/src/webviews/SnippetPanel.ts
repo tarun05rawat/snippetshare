@@ -63,6 +63,12 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
         vscode.commands.executeCommand("snippetshare.backToWorkspaces");
       } else if (message.command === "createWorkspace") {
         vscode.commands.executeCommand("snippetshare.createWorkspace");
+      } else if (message.command === "deleteWorkspace") {
+        vscode.commands.executeCommand(
+          "snippetshare.deleteWorkspace",
+          message.workspaceId,
+          message.workspaceName
+        );
       }
     });
 
@@ -120,6 +126,9 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>SnippetShare</title>
         <style>
+          .workspace-item { display: flex; align-items: center; justify-content: space-between; }
+          .workspace-item button:first-child { flex: 1; }
+          .workspace-item button:last-child { flex: 0; width: auto; padding: 0.3rem; }
           body { font-family: sans-serif; padding: 1rem; background: var(--vscode-sideBar-background); color: var(--vscode-foreground); }
           .hidden { display: none; }
           button { padding: 0.5rem; margin-bottom: 0.5rem; width: 100%; }
@@ -181,10 +190,17 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
       const list = document.getElementById('workspaceList');
       list.innerHTML = '';
       message.payload.forEach(ws => {
+        const container = document.createElement('div');
+        container.className = 'workspace-item';
         const btn = document.createElement('button');
         btn.innerText = ws.name;
         btn.onclick = () => vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId });
+        const delBtn = document.createElement('button');
+        delBtn.innerText = "🗑️";
+        delBtn.onclick = () => vscode.postMessage({ command: 'deleteWorkspace', workspaceId: ws.workspaceId, workspaceName: ws.name });
         list.appendChild(btn);
+        list.appendChild(delBtn);
+        list.appendChild(container);
       });
     }
     if (message.type === 'snippets') {

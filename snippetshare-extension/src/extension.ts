@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
 import { createSnippetCommand } from "./commands/createSnippet";
 import { SnippetPanel } from "./webviews/SnippetPanel";
-import { fetchWorkspaces, fetchSnippets } from "./utils/api";
+import { fetchWorkspaces, fetchSnippets, createWorkspace } from "./utils/api";
 import type { Snippet } from "./webviews/SnippetPanel";
+
 // 🔑 Temporary token store (global)
 export let firebaseToken: string | undefined;
 
@@ -45,6 +46,50 @@ export function activate(context: vscode.ExtensionContext) {
           });
         } else {
           vscode.window.showErrorMessage("No active text editor found.");
+        }
+      }
+    )
+  );
+
+  //Register 'create workspace' command
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.createWorkspace",
+      async () => {
+        const token = getFirebaseToken();
+        if (!token) {
+          vscode.window.showErrorMessage("⚠️ You must be logged in.");
+          return;
+        }
+
+        const name = await vscode.window.showInputBox({
+          prompt: "Enter a name for your workspace",
+          ignoreFocusOut: true,
+          validateInput: (value) =>
+            value.trim() ? null : "Workspace name cannot be empty.",
+        });
+        if (!name) {
+          return;
+        }
+
+        const type = await vscode.window.showQuickPick(["private", "custom"], {
+          placeHolder: "Select workspace type",
+        });
+        if (!type) {
+          return;
+        }
+
+        try {
+          await createWorkspace(token, { name: name.trim(), type });
+          vscode.window.showInformationMessage(
+            `✅ Workspace "${name}" created!`
+          );
+          const workspaces = await fetchWorkspaces(token);
+          await panel.showWorkspaces(workspaces);
+        } catch (err: any) {
+          vscode.window.showErrorMessage(
+            `❌ Failed to create workspace: ${err.message}`
+          );
         }
       }
     )

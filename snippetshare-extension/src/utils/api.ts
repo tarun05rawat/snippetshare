@@ -19,6 +19,29 @@ interface SnippetPayload {
   workspaceId: string;
 }
 
+//Create workspace API
+export async function createWorkspace(
+  token: string,
+  data: { name: string; type: string }
+) {
+  const response = await fetch(`${BACKEND_URL}/api/workspaces`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorResponse = await response.json();
+    const error = errorResponse as { error: string };
+    throw new Error(error.error || "Failed to create workspace.");
+  }
+
+  return await response.json();
+}
+
 // Fetch workspaces API
 export async function fetchWorkspaces(token: string): Promise<Workspace[]> {
   const response = await fetch(`${BACKEND_URL}/api/workspaces`, {

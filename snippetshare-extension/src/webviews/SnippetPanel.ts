@@ -61,6 +61,8 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
         );
       } else if (message.command === "backToWorkspaces") {
         vscode.commands.executeCommand("snippetshare.backToWorkspaces");
+      } else if (message.command === "createWorkspace") {
+        vscode.commands.executeCommand("snippetshare.createWorkspace");
       }
     });
 
@@ -147,6 +149,7 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
         <div id="workspaceView" class="hidden">
           <h2>📂 Your Workspaces</h2>
           <div id="workspaceList"></div>
+          <button id="createWorkspace">➕ Create Workspace</button>
           <button id="logout">🚪 Logout</button>
         </div>
 
@@ -160,92 +163,98 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
         <script nonce="${
           this.nonce
         }" src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-        <script nonce="${
-          this.nonce
-        }" src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-        <script nonce="${this.nonce}">
-          const firebaseConfig = ${JSON.stringify(firebaseConfig)};
-          firebase.initializeApp(firebaseConfig);
-          const vscode = acquireVsCodeApi();
+<script nonce="${
+      this.nonce
+    }" src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script nonce="${this.nonce}">
+  const firebaseConfig = ${JSON.stringify(firebaseConfig)};
+  firebase.initializeApp(firebaseConfig);
+  const vscode = acquireVsCodeApi();
 
-          // Handle messages from extension
-          window.addEventListener('message', (event) => {
-            const message = event.data;
-            if (message.type === 'workspaces') {
-              document.getElementById('authView').classList.add('hidden');
-              document.getElementById('workspaceView').classList.remove('hidden');
-              document.getElementById('snippetView').classList.add('hidden');
-              const list = document.getElementById('workspaceList');
-              list.innerHTML = '';
-              message.payload.forEach(ws => {
-                const btn = document.createElement('button');
-                btn.innerText = ws.name;
-                btn.onclick = () => vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId });
-                list.appendChild(btn);
-              });
-            }
-            if (message.type === 'snippets') {
-              document.getElementById('workspaceView').classList.add('hidden');
-              document.getElementById('snippetView').classList.remove('hidden');
-              const list = document.getElementById('snippetList');
-              list.innerHTML = '';
-              message.payload.forEach(snippet => {
-                const card = document.createElement('div');
-                card.className = 'snippet-card';
-                card.innerHTML = \`
-                  <h3>🔖 \${snippet.title}</h3>
-                  <pre><code>\${snippet.code}</code></pre>
-                  <small>Created by: \${snippet.createdBy}</small>
-                \`;
-                list.appendChild(card);
-              });
-            }
-            if (message.type === 'error') {
-              document.getElementById('error').innerText = message.payload;
-            }
-            if (message.type === 'logout') {
-              document.getElementById('authView').classList.remove('hidden');
-              document.getElementById('workspaceView').classList.add('hidden');
-              document.getElementById('snippetView').classList.add('hidden');
-            }
-          });
+  // Handle messages from extension
+  window.addEventListener('message', (event) => {
+    const message = event.data;
+    if (message.type === 'workspaces') {
+      document.getElementById('authView').classList.add('hidden');
+      document.getElementById('workspaceView').classList.remove('hidden');
+      document.getElementById('snippetView').classList.add('hidden');
+      const list = document.getElementById('workspaceList');
+      list.innerHTML = '';
+      message.payload.forEach(ws => {
+        const btn = document.createElement('button');
+        btn.innerText = ws.name;
+        btn.onclick = () => vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId });
+        list.appendChild(btn);
+      });
+    }
+    if (message.type === 'snippets') {
+      document.getElementById('workspaceView').classList.add('hidden');
+      document.getElementById('snippetView').classList.remove('hidden');
+      const list = document.getElementById('snippetList');
+      list.innerHTML = '';
+      message.payload.forEach(snippet => {
+        const card = document.createElement('div');
+        card.className = 'snippet-card';
+        card.innerHTML = \`
+          <h3>🔖 \${snippet.title}</h3>
+          <pre><code>\${snippet.code}</code></pre>
+          <small>Created by: \${snippet.createdBy}</small>
+        \`;
+        list.appendChild(card);
+      });
+    }
+    if (message.type === 'error') {
+      document.getElementById('error').innerText = message.payload;
+    }
+    if (message.type === 'logout') {
+      document.getElementById('authView').classList.remove('hidden');
+      document.getElementById('workspaceView').classList.add('hidden');
+      document.getElementById('snippetView').classList.add('hidden');
+    }
+  });
 
-          // Login and Signup logic
-          document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            try {
-              const user = await firebase.auth().signInWithEmailAndPassword(email, password);
-              const token = await user.user.getIdToken();
-              vscode.postMessage({ command: 'loginSuccess', token: token });
-            } catch (err) {
-              document.getElementById('error').innerText = err.message;
-            }
-          });
+  // Login and Signup logic
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    try {
+      const user = await firebase.auth().signInWithEmailAndPassword(email, password);
+      const token = await user.user.getIdToken();
+      vscode.postMessage({ command: 'loginSuccess', token: token });
+    } catch (err) {
+      document.getElementById('error').innerText = err.message;
+    }
+  });
 
-          document.getElementById('signupForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            try {
-              const user = await firebase.auth().createUserWithEmailAndPassword(email, password);
-              const token = await user.user.getIdToken();
-              vscode.postMessage({ command: 'signupSuccess', token: token });
-            } catch (err) {
-              document.getElementById('error').innerText = err.message;
-            }
-          });
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    try {
+      const user = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      const token = await user.user.getIdToken();
+      vscode.postMessage({ command: 'signupSuccess', token: token });
+    } catch (err) {
+      document.getElementById('error').innerText = err.message;
+    }
+  });
 
-          document.getElementById('logout').addEventListener('click', async () => {
-            await firebase.auth().signOut();
-            vscode.postMessage({ command: 'logout' });
-          });
+  document.getElementById('logout').addEventListener('click', async () => {
+    await firebase.auth().signOut();
+    vscode.postMessage({ command: 'logout' });
+  });
 
-          document.getElementById('back').addEventListener('click', () => {
-            vscode.postMessage({ command: 'backToWorkspaces' });
-          });
-        </script>
+  document.getElementById('back').addEventListener('click', () => {
+    vscode.postMessage({ command: 'backToWorkspaces' });
+  });
+
+  // 🚀 NEW Create Workspace listener
+  document.getElementById('createWorkspace').addEventListener('click', () => {
+    vscode.postMessage({ command: 'createWorkspace' });
+  });
+</script>
+
       </body>
       </html>
     `;

@@ -195,7 +195,10 @@ def create_snippet():
         "tags": tags,
         "language": language,
         "code": code,
-        "createdBy": request.user.get("uid"),
+        "createdBy": {
+            "uid": request.user.get("uid"),
+            "email": request.user.get("email")  # ✅ Add email
+        },
         "createdAt": firestore.SERVER_TIMESTAMP
     }
     doc_ref = db.collection("snippets").document()
@@ -203,6 +206,7 @@ def create_snippet():
     doc_ref.set(snippet_data)
 
     return jsonify({"snippetId": doc_ref.id}), 201
+
 
 #Add Member to Workspace
 @app.route("/api/workspaces/<workspace_id>/members/add", methods=["POST"])
@@ -284,8 +288,7 @@ def remove_workspace_members(workspace_id):
     }), 200
 
 
-
-# Delete Snippet
+#Delete Snippet
 @app.route("/api/snippets/<snippet_id>", methods=["DELETE"])
 @firebase_token_required
 def delete_snippet(snippet_id):
@@ -298,7 +301,8 @@ def delete_snippet(snippet_id):
     snippet_data = snippet_doc.to_dict()
     
     # Check that the user requesting deletion is the creator of the snippet
-    if snippet_data.get("createdBy") != request.user["uid"]:
+    created_by = snippet_data.get("createdBy", {})
+    if created_by.get("uid") != request.user["uid"]:
         return jsonify({"error": "Not authorized to delete this snippet"}), 403
 
     # Delete the snippet document from Firestore
@@ -308,7 +312,8 @@ def delete_snippet(snippet_id):
 
 
 
-#Update Snippet
+
+# Update Snippet
 @app.route("/api/snippets/<snippet_id>", methods=["PUT"])
 @firebase_token_required
 def update_snippet(snippet_id):
@@ -337,12 +342,14 @@ def update_snippet(snippet_id):
     snippet_data = snippet_doc.to_dict()
 
     # Check if the requesting user is the creator of the snippet
-    if snippet_data.get("createdBy") != request.user["uid"]:
+    created_by = snippet_data.get("createdBy", {})
+    if created_by.get("uid") != request.user["uid"]:
         return jsonify({"error": "Not authorized to update this snippet"}), 403
 
     # Update the snippet with new fields
     snippet_ref.update(updated_fields)
     return jsonify({"message": "Snippet updated successfully", "snippetId": snippet_id}), 200
+
 
 
 #Delete a Workspace
@@ -407,6 +414,7 @@ def search_snippets():
     result = []
     for snippet in snippets:
         snippet_data = snippet.to_dict()
+
         # Filter by search query in title (case-insensitive)
         title = snippet_data.get("title", "").lower()
         if search_query not in title:
@@ -424,12 +432,14 @@ def search_snippets():
             if not all(tag in snippet_tags for tag in required_tags):
                 continue
 
+        # 👇 leave createdBy as-is with { uid, email }
         result.append(snippet_data)
 
     return jsonify(result), 200
 
 
-#Get Snippet by ID
+
+# Get Snippet by ID
 @app.route("/api/snippets/<snippet_id>", methods=["GET"])
 @firebase_token_required
 def get_snippet(snippet_id):
@@ -457,8 +467,10 @@ def get_snippet(snippet_id):
     if request.user["uid"] not in workspace_data.get("members", []):
         return jsonify({"error": "Access denied - you are not a member of the workspace"}), 403
 
-    # If everything is good, return the snippet data
+    # No modification needed to snippet_data; it already contains { uid, email } for createdBy now
+
     return jsonify(snippet_data), 200
+
 
 
 # 🔵 Root health check

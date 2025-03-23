@@ -292,8 +292,8 @@ pre {
   padding-bottom: 0.5rem;
 }
 
-        </style>
-      </head>
+</style>
+</head>
       <body>
         <!-- Auth View -->
 <div 
@@ -570,6 +570,7 @@ pre {
     const message = event.data;
     if (message.type === 'workspaces') {
       document.getElementById('authView').classList.add('hidden');
+      document.getElementById('authView').style.display = 'none';
       document.getElementById('workspaceView').classList.remove('hidden');
       document.getElementById('snippetView').classList.add('hidden');
       const list = document.getElementById('workspaceList');

@@ -159,6 +159,39 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
+  //Delete Workspace
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.deleteWorkspace",
+      async (workspaceId: string, workspaceName: string) => {
+        if (!firebaseToken) {
+          vscode.window.showErrorMessage("⚠️ Not authenticated!");
+          return;
+        }
+
+        const confirmed = await vscode.window.showInformationMessage(
+          `Are you sure you want to delete workspace "${workspaceName}"?`,
+          { modal: true },
+          "Yes"
+        );
+
+        if (confirmed === "Yes") {
+          // TODO: Actually call your deleteWorkspace(...) API, e.g.
+          // await deleteWorkspace(firebaseToken, workspaceId);
+
+          vscode.window.showInformationMessage(
+            `✅ Workspace "${workspaceName}" deleted!`
+          );
+
+          // Re-fetch and show updated workspace list
+          const workspaces = await fetchWorkspaces(firebaseToken);
+          await panel.showWorkspaces(workspaces);
+        }
+      }
+    )
+  );
+
   // Handle login/signup success
   context.subscriptions.push(
     vscode.commands.registerCommand(

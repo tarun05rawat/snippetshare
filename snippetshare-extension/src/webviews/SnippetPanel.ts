@@ -296,22 +296,202 @@ pre {
       </head>
       <body>
         <!-- Auth View -->
-        <div id="authView">
-          <h2>🔐 Login</h2>
-          <form id="loginForm">
-            <input type="email" id="email" placeholder="Email" required />
-            <input type="password" id="password" placeholder="Password" required />
-            <button type="submit">Login</button>
-          </form>
-          <h2>✨ Create Account</h2>
-          <form id="signupForm">
-            <input type="email" id="signupEmail" placeholder="Email" required />
-            <input type="password" id="signupPassword" placeholder="Password" required />
-            <button type="submit">Sign Up</button>
-          </form>
-          <div id="error" style="color:red;"></div>
-        </div>
-</style>
+<div 
+  id="authView" 
+  style="display: flex; flex-direction: column; align-items: center; gap: 12px;"
+>
+  <h2 
+    style="
+      font-size: 18px;
+      color: var(--vscode-editorForeground);
+      margin: 0;
+    "
+  >
+    🔐 Login
+  </h2>
+
+  <!-- Login Wrapper -->
+  <div 
+    id="loginWrapper" 
+    style="width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px;"
+  >
+    <form 
+      id="loginForm" 
+      style="
+        display: flex; 
+        flex-direction: column; 
+        gap: 8px; 
+      "
+    >
+      <input 
+        type="email" 
+        id="email" 
+        placeholder="Email" 
+        required 
+        style="
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid var(--vscode-editorWidget-border);
+          background: var(--vscode-editor-background);
+          color: var(--vscode-foreground);
+        "
+      />
+      <input 
+        type="password" 
+        id="password" 
+        placeholder="Password" 
+        required 
+        style="
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid var(--vscode-editorWidget-border);
+          background: var(--vscode-editor-background);
+          color: var(--vscode-foreground);
+        "
+      />
+      <button 
+        type="submit" 
+        style="
+          background: var(--vscode-button-background);
+          color: var(--vscode-button-foreground);
+          border: 1px solid var(--vscode-button-border);
+          border-radius: 4px;
+          padding: 8px;
+          cursor: pointer;
+          font-weight: bold;
+        "
+      >
+        Login
+      </button>
+    </form>
+    <div 
+      style="
+        font-size: 12px; 
+        text-align: center; 
+        color: var(--vscode-foreground);
+      "
+    >
+      Don't have an account? 
+      <button 
+        id="showSignup" 
+        style="
+          background: none; 
+          border: none; 
+          color: var(--vscode-button-foreground); 
+          cursor: pointer; 
+          text-decoration: underline;
+        "
+      >
+        Sign Up
+      </button>
+    </div>
+  </div>
+
+  <!-- Signup Wrapper (initially hidden) -->
+  <div 
+    id="signupWrapper" 
+    style="
+      width: 100%; 
+      max-width: 300px; 
+      display: none; 
+      flex-direction: column; 
+      gap: 10px;
+    "
+  >
+    <h2 
+      style="
+        font-size: 18px;
+        color: var(--vscode-editorForeground);
+        margin: 0;
+      "
+    >
+      ✨ Create Account
+    </h2>
+    <form 
+      id="signupForm" 
+      style="
+        display: flex; 
+        flex-direction: column; 
+        gap: 8px;
+      "
+    >
+      <input 
+        type="email" 
+        id="signupEmail" 
+        placeholder="Email" 
+        required
+        style="
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid var(--vscode-editorWidget-border);
+          background: var(--vscode-editor-background);
+          color: var(--vscode-foreground);
+        "
+      />
+      <input 
+        type="password" 
+        id="signupPassword" 
+        placeholder="Password" 
+        required
+        style="
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid var(--vscode-editorWidget-border);
+          background: var(--vscode-editor-background);
+          color: var(--vscode-foreground);
+        "
+      />
+      <button 
+        type="submit"
+        style="
+          background: var(--vscode-button-background);
+          color: var(--vscode-button-foreground);
+          border: 1px solid var(--vscode-button-border);
+          border-radius: 4px;
+          padding: 8px;
+          cursor: pointer;
+          font-weight: bold;
+        "
+      >
+        Sign Up
+      </button>
+    </form>
+    <div
+      style="
+        font-size: 12px; 
+        text-align: center;
+        color: var(--vscode-foreground);
+      "
+    >
+      Already have an account? 
+      <button 
+        id="showLogin" 
+        style="
+          background: none; 
+          border: none; 
+          color: var(--vscode-button-foreground);
+          cursor: pointer;
+          text-decoration: underline;
+        "
+      >
+        Log In
+      </button>
+    </div>
+  </div>
+
+  <div 
+    id="error" 
+    style="
+      color: red; 
+      font-size: 12px; 
+      text-align: center;
+      margin-top: 8px;
+    "
+  >
+  </div>
+</div>
+
+
         <!-- Workspace View -->
         <div id="workspaceView" class="hidden">
           <header>
@@ -334,18 +514,44 @@ pre {
         <!-- Snippets View -->
         <div id="snippetView" class="hidden">
           <h2>📝 Snippets</h2>
+        <div id="snippetSearchBar" style="display: flex; gap: 6px; align-items: center; margin-bottom: 10px;">
+            <input
+              type="text"
+              id="snippetSearchInput"
+              placeholder="Search title, code, or tags..."
+              style="
+                flex: 1;
+                padding: 4px; 
+                border: 1px solid var(--vscode-editorWidget-border); 
+                border-radius: 4px; 
+                background: var(--vscode-editor-background); 
+                color: var(--vscode-foreground);
+              "
+            />
+            <button 
+              id="snippetSearchButton" 
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 4px 8px; 
+                border: 1px solid var(--vscode-button-border); 
+                border-radius: 4px; 
+                background: var(--vscode-button-background); 
+                color: var(--vscode-button-foreground);
+                cursor: pointer;
+                transition: background 0.2s;
+              "
+              title="Search"
+            >
+              🔍
+            </button>
+          </div>
           <div id="snippetList"></div>
           <div style="margin-bottom: 10px;">
-          <div id="snippetSearchBar" style="margin-bottom: 10px;">
-          <input
-            type="text"
-            id="snippetSearchInput"
-            placeholder="Search title, code, or tags..."
-            style="width: 80%; padding: 5px;"
-          />
-          <button id="snippetSearchButton" style="width: 18%;">Search</button>
-        </div>
-          <button id="back">🔙 Back to Workspaces</button>
+          
+            <button id="back">🔙 Back to Workspaces</button>
+          </div>
         </div>
 
         <script nonce="${
@@ -467,6 +673,24 @@ pre {
       document.getElementById('error').innerText = err.message;
     }
   });
+
+  const loginWrapper = document.getElementById("loginWrapper");
+  const signupWrapper = document.getElementById("signupWrapper");
+
+  const showSignupBtn = document.getElementById("showSignup");
+  const showLoginBtn = document.getElementById("showLogin");
+
+  showSignupBtn.addEventListener("click", () => {
+    loginWrapper.style.display = "none";
+    signupWrapper.style.display = "flex";
+  });
+
+  showLoginBtn.addEventListener("click", () => {
+    signupWrapper.style.display = "none";
+    loginWrapper.style.display = "flex";
+  });
+
+
 
   document.getElementById('logout').addEventListener('click', async () => {
     await firebase.auth().signOut();

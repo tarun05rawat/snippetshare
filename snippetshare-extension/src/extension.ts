@@ -11,6 +11,11 @@ export function setFirebaseToken(token: string) {
   vscode.window.showInformationMessage("🔑 Firebase token saved!");
 }
 
+export function clearFirebaseToken() {
+  firebaseToken = undefined;
+  vscode.window.showInformationMessage("🚪 Logged out successfully!");
+}
+
 export function getFirebaseToken(): string | undefined {
   return firebaseToken;
 }
@@ -49,25 +54,31 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerWebviewViewProvider(SnippetPanel.viewType, panel)
   );
 
-  // Listen to the custom command fired by SnippetPanel webview
+  // Handle auth success message from SnippetPanel webview
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "snippetshare.handleAuth",
       async (token: string) => {
         setFirebaseToken(token);
-
         try {
-          const workspaces = await fetchWorkspaces();
+          const workspaces = await fetchWorkspaces(token);
+          await panel.showWorkspaces(workspaces);
           vscode.window.showInformationMessage(
             `✅ Authenticated! Found ${workspaces.length} workspaces.`
           );
         } catch (err: any) {
-          vscode.window.showErrorMessage(
-            `Error fetching workspaces: ${err.message}`
-          );
+          await panel.showError(err.message || "Failed to fetch workspaces.");
         }
       }
     )
+  );
+
+  // Handle logout message from SnippetPanel webview
+  context.subscriptions.push(
+    vscode.commands.registerCommand("snippetshare.handleLogout", () => {
+      clearFirebaseToken();
+      panel.showLoginForm();
+    })
   );
 }
 

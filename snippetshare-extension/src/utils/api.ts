@@ -13,24 +13,22 @@ interface Workspace {
 }
 
 // Fetch workspaces API
-export async function fetchWorkspaces(): Promise<Workspace[]> {
-  const token = getFirebaseToken();
-  if (!token) {
-    throw new Error("Firebase token is missing. Please login first.");
-  }
-
-  const response = await fetch(`${BACKEND_URL}/api/workspaces`, {
+export async function fetchWorkspaces(token: string): Promise<Workspace[]> {
+  const response = await fetch("http://localhost:8000/api/workspaces", {
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch workspaces: ${response.statusText}`);
+    const errorResponse = await response.json();
+    const error = errorResponse as { error: string };
+    throw new Error(error.error || "Unknown error");
   }
 
-  const data = (await response.json()) as Workspace[];
-  return data;
+  return response.json() as Promise<Workspace[]>;
 }
 
 // Example: Create a workspace

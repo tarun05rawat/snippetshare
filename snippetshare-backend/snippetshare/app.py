@@ -28,6 +28,42 @@ def firebase_token_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+#Signup User
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({'error': 'Email and password are required'}), 400
+
+    try:
+        user_record = firebase_auth.create_user(email=email, password=password)
+        return jsonify({'uid': user_record.uid}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+#Login user
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({'error': 'Email and password are required'}), 400
+
+    try:
+        # Optional: Just verify user exists, since Admin SDK does not check passwords
+        user_record = firebase_auth.get_user_by_email(email)
+        # You might later issue a custom token here if needed
+        return jsonify({'uid': user_record.uid}), 200
+    except firebase_auth.UserNotFoundError:
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 # Create a workspace

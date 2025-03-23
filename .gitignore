@@ -21,3 +21,6 @@ firebase_admin_setup.cpython-313.pyc
 
 
 *.pyc
+
+node_modules/
+

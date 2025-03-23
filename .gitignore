@@ -5,3 +5,4 @@ node_modules/
 *.vsix
 snippetshare-service-account.json
 firebase_admin_setup.cpython-313.pyc
+venv

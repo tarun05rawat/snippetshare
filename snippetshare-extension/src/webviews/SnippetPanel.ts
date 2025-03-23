@@ -616,11 +616,37 @@ pre {
         card.innerHTML = \`
           <h3>🔖 \${snippet.title}</h3>
           <pre><code>\${snippet.code}</code></pre>
+          <button class="copy-btn" style="
+            margin-top: 5px;
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: 1px solid var(--vscode-button-border);
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+          ">📋</button>
+          <br />
           <small>Created by: \${snippet.createdBy}</small>
           <br />
           <small>Tags: \${tagsLabel}</small>
         \`;
         list.appendChild(card);
+        
+        // Handle copy button click
+        const copyBtn = card.querySelector('.copy-btn');
+        const codeBlock = card.querySelector('pre code');
+
+        copyBtn.addEventListener('click', () => {
+          const codeText = codeBlock.innerText;
+          navigator.clipboard.writeText(codeText)
+            .then(() => {
+              vscode.postMessage({ command: 'copySuccess', snippetId: snippet.snippetId });
+            })
+            .catch(err => {
+              vscode.postMessage({ command: 'copyError', snippetId: snippet.snippetId, error: err.message });
+            });
+        });
       });
       const searchButton = document.getElementById('snippetSearchButton');
       const searchInput = document.getElementById('snippetSearchInput');

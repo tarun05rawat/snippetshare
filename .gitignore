@@ -1,0 +1,7 @@
+out
+dist
+node_modules/
+.vscode-test/
+*.vsix
+snippetshare-service-account.json
+firebase_admin_setup.cpython-313.pyc

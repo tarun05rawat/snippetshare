@@ -1,19 +1,14 @@
 import * as vscode from "vscode";
 import { createSnippetCommand } from "./commands/createSnippet";
 import { SnippetPanel } from "./webviews/SnippetPanel";
-import { fetchWorkspaces } from "./utils/api";
-
+import { fetchWorkspaces, fetchSnippets } from "./utils/api";
+import type { Snippet } from "./webviews/SnippetPanel";
 // 🔑 Temporary token store (global)
 export let firebaseToken: string | undefined;
 
 export function setFirebaseToken(token: string) {
   firebaseToken = token;
   vscode.window.showInformationMessage("🔑 Firebase token saved!");
-}
-
-export function clearFirebaseToken() {
-  firebaseToken = undefined;
-  vscode.window.showInformationMessage("🚪 Logged out successfully!");
 }
 
 export function getFirebaseToken(): string | undefined {
@@ -23,7 +18,14 @@ export function getFirebaseToken(): string | undefined {
 export function activate(context: vscode.ExtensionContext) {
   console.log("🎉 SnippetShare extension is now active!");
 
-  // Register create snippet command (Ctrl/Cmd + Alt + S)
+  const panel = new SnippetPanel(context);
+
+  // Register SnippetPanel view
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(SnippetPanel.viewType, panel)
+  );
+
+  // Register "create snippet" command
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "snippetshare.createSnippet",
@@ -48,13 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  // Register SnippetPanel (right-side webview)
-  const panel = new SnippetPanel(context);
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(SnippetPanel.viewType, panel)
-  );
-
-  // Handle auth success message from SnippetPanel webview
+  // Handle login/signup success
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "snippetshare.handleAuth",
@@ -68,16 +64,42 @@ export function activate(context: vscode.ExtensionContext) {
           );
         } catch (err: any) {
           await panel.showError(err.message || "Failed to fetch workspaces.");
+          vscode.window.showErrorMessage(
+            `Error fetching workspaces: ${err.message}`
+          );
         }
       }
     )
   );
 
-  // Handle logout message from SnippetPanel webview
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.workspaceSelected",
+      async (workspaceId: string) => {
+        if (!firebaseToken) {
+          vscode.window.showErrorMessage("⚠️ Not authenticated!");
+          return;
+        }
+        try {
+          const snippets = await fetchSnippets(firebaseToken, workspaceId); // FIXED here!
+          if (Array.isArray(snippets)) {
+            await panel.showSnippets(snippets as Snippet[]);
+          } else {
+            throw new Error("Invalid snippets data received.");
+          }
+        } catch (err: any) {
+          await panel.showError(err.message || "Failed to fetch snippets.");
+        }
+      }
+    )
+  );
+
+  // Handle logout
   context.subscriptions.push(
     vscode.commands.registerCommand("snippetshare.handleLogout", () => {
-      clearFirebaseToken();
+      firebaseToken = undefined;
       panel.showLoginForm();
+      vscode.window.showInformationMessage("👋 Logged out!");
     })
   );
 }

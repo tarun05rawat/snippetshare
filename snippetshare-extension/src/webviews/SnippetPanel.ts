@@ -1,8 +1,15 @@
 import * as vscode from "vscode";
 
-type Workspace = {
+export type Workspace = {
   workspaceId: string;
   name: string;
+};
+
+export type Snippet = {
+  snippetId: string;
+  title: string;
+  code: string;
+  createdBy: string;
 };
 
 function getNonce() {
@@ -36,7 +43,6 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
       localResourceRoots: [this.context.extensionUri],
     };
 
-    // Listen for logout postMessage event
     webviewView.webview.onDidReceiveMessage((message) => {
       if (message.command === "logout") {
         vscode.commands.executeCommand("snippetshare.handleLogout");
@@ -48,6 +54,13 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
           "snippetshare.handleAuth",
           message.token
         );
+      } else if (message.command === "workspaceSelected") {
+        vscode.commands.executeCommand(
+          "snippetshare.workspaceSelected",
+          message.workspaceId
+        );
+      } else if (message.command === "backToWorkspaces") {
+        vscode.commands.executeCommand("snippetshare.backToWorkspaces");
       }
     });
 
@@ -58,6 +71,13 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
     this._view?.webview.postMessage({
       type: "workspaces",
       payload: workspaces,
+    });
+  }
+
+  public async showSnippets(snippets: Snippet[]) {
+    this._view?.webview.postMessage({
+      type: "snippets",
+      payload: snippets,
     });
   }
 
@@ -101,6 +121,8 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
           body { font-family: sans-serif; padding: 1rem; background: var(--vscode-sideBar-background); color: var(--vscode-foreground); }
           .hidden { display: none; }
           button { padding: 0.5rem; margin-bottom: 0.5rem; width: 100%; }
+          pre { background: #222; padding: 0.5rem; overflow: auto; border-radius: 5px; }
+          .snippet-card { margin-bottom: 1rem; border-bottom: 1px solid #555; padding-bottom: 0.5rem; }
         </style>
       </head>
       <body>
@@ -128,6 +150,13 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
           <button id="logout">🚪 Logout</button>
         </div>
 
+        <!-- Snippets View -->
+        <div id="snippetView" class="hidden">
+          <h2>📝 Snippets</h2>
+          <div id="snippetList"></div>
+          <button id="back">🔙 Back to Workspaces</button>
+        </div>
+
         <script nonce="${
           this.nonce
         }" src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -145,12 +174,30 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
             if (message.type === 'workspaces') {
               document.getElementById('authView').classList.add('hidden');
               document.getElementById('workspaceView').classList.remove('hidden');
+              document.getElementById('snippetView').classList.add('hidden');
               const list = document.getElementById('workspaceList');
               list.innerHTML = '';
               message.payload.forEach(ws => {
                 const btn = document.createElement('button');
                 btn.innerText = ws.name;
+                btn.onclick = () => vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId });
                 list.appendChild(btn);
+              });
+            }
+            if (message.type === 'snippets') {
+              document.getElementById('workspaceView').classList.add('hidden');
+              document.getElementById('snippetView').classList.remove('hidden');
+              const list = document.getElementById('snippetList');
+              list.innerHTML = '';
+              message.payload.forEach(snippet => {
+                const card = document.createElement('div');
+                card.className = 'snippet-card';
+                card.innerHTML = \`
+                  <h3>🔖 \${snippet.title}</h3>
+                  <pre><code>\${snippet.code}</code></pre>
+                  <small>Created by: \${snippet.createdBy}</small>
+                \`;
+                list.appendChild(card);
               });
             }
             if (message.type === 'error') {
@@ -159,6 +206,7 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
             if (message.type === 'logout') {
               document.getElementById('authView').classList.remove('hidden');
               document.getElementById('workspaceView').classList.add('hidden');
+              document.getElementById('snippetView').classList.add('hidden');
             }
           });
 
@@ -189,10 +237,13 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
             }
           });
 
-          // Logout
           document.getElementById('logout').addEventListener('click', async () => {
             await firebase.auth().signOut();
             vscode.postMessage({ command: 'logout' });
+          });
+
+          document.getElementById('back').addEventListener('click', () => {
+            vscode.postMessage({ command: 'backToWorkspaces' });
           });
         </script>
       </body>

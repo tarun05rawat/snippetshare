@@ -12,9 +12,16 @@ interface Workspace {
   createdAt?: string;
 }
 
+interface SnippetPayload {
+  title: string;
+  code: string;
+  tags: string[];
+  workspaceId: string;
+}
+
 // Fetch workspaces API
 export async function fetchWorkspaces(token: string): Promise<Workspace[]> {
-  const response = await fetch("http://localhost:8000/api/workspaces", {
+  const response = await fetch(`${BACKEND_URL}/api/workspaces`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -25,15 +32,16 @@ export async function fetchWorkspaces(token: string): Promise<Workspace[]> {
   if (!response.ok) {
     const errorResponse = await response.json();
     const error = errorResponse as { error: string };
-    throw new Error(error.error || "Unknown error");
+    throw new Error(error.error || "Unknown error while fetching workspaces.");
   }
 
   return response.json() as Promise<Workspace[]>;
 }
 
+// Fetch snippets API
 export async function fetchSnippets(token: string, workspaceId: string) {
   const response = await fetch(
-    `http://localhost:8000/api/snippets?workspace=${workspaceId}`,
+    `${BACKEND_URL}/api/snippets?workspace=${workspaceId}`,
     {
       method: "GET",
       headers: {
@@ -51,29 +59,22 @@ export async function fetchSnippets(token: string, workspaceId: string) {
   return data;
 }
 
-// // Example: Create a workspace
-// export async function createWorkspace(
-//   name: string,
-//   type: "private" | "custom",
-//   members: string[] = []
-// ): Promise<{ workspaceId: string }> {
-//   const token = getFirebaseToken();
-//   if (!token) {
-//     throw new Error("Firebase token is missing. Please login first.");
-//   }
+// Create snippet API
+export async function createSnippet(token: string, snippet: SnippetPayload) {
+  const response = await fetch(`${BACKEND_URL}/api/snippets`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(snippet),
+  });
 
-//   const response = await fetch(`${BACKEND_URL}/api/workspaces`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify({ name, type, members }),
-//   });
+  if (!response.ok) {
+    const errorResponse = await response.json();
+    const error = errorResponse as { error: string };
+    throw new Error(error.error || "Unknown error while creating snippet.");
+  }
 
-//   if (!response.ok) {
-//     throw new Error(`Failed to create workspace: ${response.statusText}`);
-//   }
-
-//   return (await response.json()) as { workspaceId: string };
-// }
+  return await response.json();
+}

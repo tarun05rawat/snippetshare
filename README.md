@@ -1,131 +1,144 @@
 # SnippetShare
 
-> A VS Code Extension for collaborative snippet management — without leaving your editor.
-
 ## 🚀 Use Case
 
-Have you ever been juggling between Slack, Notion, and personal gists just to share code snippets with your team? It's inefficient and distracting.
+Tired of juggling Slack messages, Notion docs, and endless browser tabs to find a single code snippet shared by your team? Developers often waste time switching contexts and searching through external tools for reusable code. SnippetShare brings your team’s snippet collaboration directly **inside VS Code**, where you’re already working.
 
-**SnippetShare** eliminates context-switching by bringing all your shared code snippets directly into VS Code.
+## 💡 The Solution: SnippetShare
 
----
+SnippetShare is a VS Code extension combined with a secure Flask & Firebase backend, allowing teams to:
 
-## 🛠️ What is SnippetShare?
-
-**SnippetShare** is a lightweight, collaborative VS Code extension designed for teams and students to organize, share, and manage code snippets in one place — right inside your editor.
-
-It provides:
-
-- **Private Workspaces** for team or project-based collaboration
-- **Snippet Storage** in shared workspaces
-- **Role Management** by adding/removing workspace members
-- **Search & Filter** functionality to find your snippets fast
-- **Copy Snippet** to clipboard (with indentation and formatting intact)
-
----
+- Collaborate and share code snippets within private workspaces.
+- Avoid leaving your IDE to share, search, or manage team snippets.
+- Maintain team knowledge in one place with seamless access.
 
 ## ✨ Features
 
-### 🗂️ Workspaces
+- 🔐 **Authentication (Login / Signup) via Firebase Auth**
+- 📂 **Workspace Management**
+  - Create private or shared workspaces
+  - Add or remove members securely
+  - Delete workspaces
+- 📝 **Snippet Management**
+  - View and search snippets within a workspace
+  - Filter by title, code, or tags
+  - Copy code snippets to clipboard (with preserved indentation)
+- 🔎 **Full-text search** within workspaces
+- 🔄 **One-click access** to all workspace snippets inside VS Code
+- ⚙️ **Contextual commands** (e.g., insert snippet directly into active editor)
 
-- Create dedicated workspaces for different projects or teams.
-- Workspaces act as "folders" that group related snippets.
+## 🧠 Why SnippetShare?
 
-### 👥 Member Management
+- No more switching to external collaboration tools.
+- Secure & organized code sharing.
+- Fits natively into your VS Code workflow.
 
-- Add or remove members in your workspace.
-- Collaborators get immediate access to shared snippets.
+## 💼 Example Use Cases
 
-### 🔐 Auth & Security
+- **Student project teams** collaborating on assignments.
+- **Internal engineering teams** sharing deployment scripts, SQL queries, or common utility functions.
+- **Freelancers & agencies** maintaining client-specific workspaces.
 
-- Firebase Authentication (Email/Password) integrated.
-- Only authenticated users can access or modify workspaces.
+## 🛠️ Setup Instructions
 
-### 🔎 Snippet Search
-
-- Search snippets by title, code content, or tags.
-- Ideal for quickly finding reusable code blocks.
-
-### 📋 Copy Snippet Button
-
-- Easily copy code to your clipboard with one click.
-- Preserves formatting and indentation.
-
-### ⚡ Everything inside VS Code
-
-- No more jumping between apps.
-- All actions (create workspace, manage members, search, share) happen inside VS Code's sidebar.
-
----
-
-## 💡 Example Use Cases
-
-### 🧑‍💻 For Development Teams
-
-- Share boilerplate code, configs, or utility functions.
-- Set up "Frontend Team", "Backend Team", or "DevOps" workspaces.
-
-### 🎓 For Students / Study Groups
-
-- Share algorithms, notes, or project-specific snippets.
-- Organize "DSA Prep", "Web Project Group", or "Class Notes" workspaces.
-
-### 🚀 For Hackathons
-
-- Collaborate on-the-fly with teammates during time-sensitive coding sprints.
-- One workspace = one hackathon project.
-
----
-
-## 🏗️ Technical Highlights
-
-- **VS Code API** for UI rendering inside the activity bar
-- **Webview Panel** for authentication and workspace/snippet management
-- **Firebase Auth & Firestore** as backend services
-- **Flask API Layer** for secure communication between the extension and database
-- **Secure CSP Policy** applied for webviews
-- **Shadcn/ui & Lucide Icons** for clean UI components
-
----
-
-## 🛠️ Setup & Installation
+### 1. Clone the repository
 
 ```bash
-# Install vsce if needed
+git clone https://github.com/your-username/snippetshare.git
+cd snippetshare
+```
+
+### 2. Install VS Code extension dependencies
+
+```bash
+cd snippetshare-extension
+npm install
+```
+
+### 3. Package the extension (optional)
+
+```bash
 npm install -g @vscode/vsce
-
-# Package the extension
 vsce package
+```
 
-# Install the generated .vsix file
-code --install-extension snippetshare-<version>.vsix
+### 4. Install the extension locally
+
+```bash
+code --install-extension ./snippetshare-*.vsix
 ```
 
 ---
 
-## 🎯 Value Proposition
+### 🖥️ Backend Setup (Flask + Firebase)
 
-**Why go outside VS Code when everything you need is right here?**
+### 1. Navigate to backend directory
 
-- 🧠 Minimize context-switching
-- 🚀 Speed up snippet sharing and collaboration
-- 🏡 Keep your team productive — inside the editor
+```bash
+cd snippetshare-backend
+```
+
+### 2. Create & activate virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install backend dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Set environment variables
+
+Create a `.env` file in `snippetshare-backend/` with:
+
+```env
+FIREBASE_API_KEY=your_firebase_api_key
+FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+FIREBASE_PROJECT_ID=your_firebase_project_id
+FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+FIREBASE_MESSAGING_SENDER_ID=your_firebase_sender_id
+FIREBASE_APP_ID=your_firebase_app_id
+```
+
+### 5. Run the backend server
+
+```bash
+flask run --port=5000
+```
+
+> ⚠️ Note: The VS Code extension will communicate with this backend via HTTP on port 5000.
 
 ---
 
-## 🔗 Future Plans
+## 🧩 Tech Stack
 
-- Roles & Permissions (e.g., admin-only actions)
-- Code snippet versioning
-- VS Code command palette integrations
-- Multi-language snippet tagging
-
----
-
-## 💬 Feedback & Contributions
-
-We welcome suggestions and contributions! PRs and issue reports are appreciated.
+- **Frontend**: VS Code Webview API (HTML/CSS/JS)
+- **Backend**: Flask + Firebase Admin SDK
+- **Auth**: Firebase Authentication
+- **Database**: Firebase Firestore
+- **Packaging**: VSCE CLI (for extension distribution)
 
 ---
 
-Enjoy SnippetShare 🎉
+## 📢 Value Proposition
+
+> Everything happens inside VS Code. Why go outside?
+
+---
+
+## 🤖 Future Improvements
+
+- ⭐ Snippet tagging + categories
+- 🛠️ Role-based access control (RBAC)
+- 📨 In-app notifications for workspace events
+- 🔔 Webhooks for CI/CD integrations
+
+---
+
+## License
+
+[MIT](LICENSE)

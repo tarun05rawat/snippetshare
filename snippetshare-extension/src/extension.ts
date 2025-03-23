@@ -7,6 +7,7 @@ import {
   createWorkspace,
   addMembersToWorkspace,
   searchSnippets,
+  deleteWorkspace,
 } from "./utils/api";
 import type { Snippet } from "./webviews/SnippetPanel";
 
@@ -170,23 +171,32 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
 
-        const confirmed = await vscode.window.showInformationMessage(
+        const confirm = await vscode.window.showInformationMessage(
           `Are you sure you want to delete workspace "${workspaceName}"?`,
           { modal: true },
           "Yes"
         );
 
-        if (confirmed === "Yes") {
-          // TODO: Actually call your deleteWorkspace(...) API, e.g.
-          // await deleteWorkspace(firebaseToken, workspaceId);
+        if (confirm === "Yes") {
+          try {
+            // 1) Actually call your API
+            await deleteWorkspace(firebaseToken, workspaceId);
 
-          vscode.window.showInformationMessage(
-            `✅ Workspace "${workspaceName}" deleted!`
-          );
+            // 2) Notify the user
+            vscode.window.showInformationMessage(
+              `✅ Workspace "${workspaceName}" deleted!`
+            );
 
-          // Re-fetch and show updated workspace list
-          const workspaces = await fetchWorkspaces(firebaseToken);
-          await panel.showWorkspaces(workspaces);
+            // 3) Re-fetch the updated list
+            const workspaces = await fetchWorkspaces(firebaseToken);
+
+            // 4) Show the updated list in your SnippetPanel
+            await panel.showWorkspaces(workspaces);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(
+              `❌ Failed to delete workspace: ${err.message}`
+            );
+          }
         }
       }
     )

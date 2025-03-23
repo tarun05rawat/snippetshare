@@ -126,9 +126,131 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>SnippetShare</title>
         <style>
-          .workspace-item { display: flex; align-items: center; justify-content: space-between; }
-          .workspace-item button:first-child { flex: 1; }
-          .workspace-item button:last-child { flex: 0; width: auto; padding: 0.3rem; }
+          .workspace-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+.workspace-item {
+            background-color: #f5f5f5;
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+.workspace-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+        .workspace-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 1px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            color: #ff3333;
+            background-color: rgba(255, 51, 51, 0.1);
+        }
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.create-btn, .logout-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+}
+
+.create-btn {
+    background-color: #4caf50;
+    color: white;
+}
+
+.create-btn:hover {
+    background-color: #3d8b40;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.logout-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.logout-btn:hover {
+    background-color: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ffd700;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: #ffd700;
+}
+
+.close-btn {
+    font-size: 28px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.folder-icon {
+    opacity: 0.7;
+}
+
           body { font-family: sans-serif; padding: 1rem; background: var(--vscode-sideBar-background); color: var(--vscode-foreground); }
           .hidden { display: none; }
           button { padding: 0.5rem; margin-bottom: 0.5rem; width: 100%; }
@@ -153,14 +275,25 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
           </form>
           <div id="error" style="color:red;"></div>
         </div>
-
+</style>
         <!-- Workspace View -->
         <div id="workspaceView" class="hidden">
-          <h2>📂 Your Workspaces</h2>
-          <div id="workspaceList"></div>
-          <button id="createWorkspace">➕ Create Workspace</button>
-          <button id="logout">🚪 Logout</button>
+          <header>
+            <h1>SNIPPETS</h1>
+            <div class="close-btn" onclick="vscode.postMessage({ command: 'logout' })">×</div>
+          </header>
+
+          <div class="workspaces-section">
+            <h2><span class="folder-icon">📁</span> Your Workspaces</h2>
+            <div id="workspaceList" class="workspace-list"></div>
+
+            <div class="action-buttons">
+              <button id="createWorkspace" class="create-btn">➕ Create Workspace</button>
+              <button id="logout" class="logout-btn">🚪 Logout</button>
+            </div>
+          </div>
         </div>
+
 
         <!-- Snippets View -->
         <div id="snippetView" class="hidden">
@@ -192,14 +325,16 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
       message.payload.forEach(ws => {
         const container = document.createElement('div');
         container.className = 'workspace-item';
-        const btn = document.createElement('button');
-        btn.innerText = ws.name;
-        btn.onclick = () => vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId });
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'workspace-name';
+        nameDiv.innerText = ws.name;
+        nameDiv.onclick = () => vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId });
         const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
         delBtn.innerText = "🗑️";
         delBtn.onclick = () => vscode.postMessage({ command: 'deleteWorkspace', workspaceId: ws.workspaceId, workspaceName: ws.name });
-        list.appendChild(btn);
-        list.appendChild(delBtn);
+        container.appendChild(nameDiv);
+        container.appendChild(delBtn);
         list.appendChild(container);
       });
     }

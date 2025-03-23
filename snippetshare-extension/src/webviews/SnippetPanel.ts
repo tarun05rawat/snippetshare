@@ -10,6 +10,7 @@ export type Snippet = {
   title: string;
   code: string;
   createdBy: string;
+  tags?: string[];
 };
 
 function getNonce() {
@@ -133,135 +134,158 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
         <title>SnippetShare</title>
         <style>
           .workspace-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-.workspace-item {
-            background-color: #f5f5f5;
-            border-radius: 6px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.2s;
-        }
-
-.workspace-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-        .workspace-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            }
+.workspace-item {
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-editorWidget-border);
+  border-radius: 5px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.15s;
+}
 
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #888;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 1px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
+.workspace-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
 
-        .delete-btn:hover {
-            color: #ff3333;
-            background-color: rgba(255, 51, 51, 0.1);
-        }
+.workspace-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--vscode-foreground);
+  flex: 1;
+  cursor: pointer;
+}
+
+.delete-btn, .add-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.delete-btn:hover, .add-btn:hover {
+  opacity: 1;
+  color: var(--vscode-editorError-foreground);
+}
 
 .action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .create-btn, .logout-btn {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.2s;
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: 1px solid var(--vscode-button-border);
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
-.create-btn {
-    background-color: #4caf50;
-    color: white;
-}
-
-.create-btn:hover {
-    background-color: #3d8b40;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.create-btn:hover, .logout-btn:hover {
+  background-color: var(--vscode-button-hoverBackground);
+  transform: translateY(-1px);
 }
 
 .logout-btn {
-    background-color: #f44336;
-    color: white;
+  background-color: #f44336 !important;
+  color: #fff !important;
+  border: none !important;
 }
 
 .logout-btn:hover {
-    background-color: #d32f2f;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #d32f2f !important;
 }
 
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #ffd700;
-    margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--vscode-editorForeground);
+  margin-bottom: 20px;
 }
 
 h1 {
-    font-size: 24px;
-    letter-spacing: 1px;
-    color: #ffd700;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--vscode-editorForeground);
+  margin: 0;
 }
 
 .close-btn {
-    font-size: 28px;
-    cursor: pointer;
-    color: #aaa;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--vscode-editorHint-foreground);
+  opacity: 0.8;
 }
 
 .close-btn:hover {
-    color: #fff;
+  opacity: 1;
 }
 
 h2 {
-    font-size: 22px;
-    margin-bottom: 20px;
-    color: #aaa;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: var(--vscode-foreground);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
 }
 
 .folder-icon {
-    opacity: 0.7;
+  opacity: 0.8;
 }
 
-          body { font-family: sans-serif; padding: 1rem; background: var(--vscode-sideBar-background); color: var(--vscode-foreground); }
-          .hidden { display: none; }
-          button { padding: 0.5rem; margin-bottom: 0.5rem; width: 100%; }
-          pre { background: #222; padding: 0.5rem; overflow: auto; border-radius: 5px; }
-          .snippet-card { margin-bottom: 1rem; border-bottom: 1px solid #555; padding-bottom: 0.5rem; }
+body {
+  font-family: var(--vscode-font-family, sans-serif);
+  font-size: var(--vscode-font-size);
+  line-height: 1.5;
+  padding: 0.75rem;
+  background: var(--vscode-sideBar-background);
+  color: var(--vscode-foreground);
+}
+
+.hidden {
+  display: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+pre {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  padding: 8px;
+  overflow: auto;
+  border-radius: 5px;
+  border: 1px solid var(--vscode-editorWidget-border);
+}
+
+.snippet-card {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--vscode-editorWidget-border);
+  padding-bottom: 0.5rem;
+}
+
         </style>
       </head>
       <body>
@@ -362,10 +386,15 @@ h2 {
       message.payload.forEach(snippet => {
         const card = document.createElement('div');
         card.className = 'snippet-card';
+        const tagsLabel = (snippet.tags && snippet.tags.length)
+        ? snippet.tags.join(", ")
+        : "(no tags)";
         card.innerHTML = \`
           <h3>🔖 \${snippet.title}</h3>
           <pre><code>\${snippet.code}</code></pre>
           <small>Created by: \${snippet.createdBy}</small>
+          <br />
+          <small>Tags: \${tagsLabel}</small>
         \`;
         list.appendChild(card);
       });

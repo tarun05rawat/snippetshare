@@ -76,6 +76,12 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
           message.workspaceId,
           message.workspaceName
         );
+      } else if (message.command === "searchSnippets") {
+        vscode.commands.executeCommand(
+          "snippetshare.searchSnippets",
+          message.workspaceId,
+          message.query
+        );
       }
     });
 
@@ -329,6 +335,16 @@ pre {
         <div id="snippetView" class="hidden">
           <h2>📝 Snippets</h2>
           <div id="snippetList"></div>
+          <div style="margin-bottom: 10px;">
+          <div id="snippetSearchBar" style="margin-bottom: 10px;">
+          <input
+            type="text"
+            id="snippetSearchInput"
+            placeholder="Search title, code, or tags..."
+            style="width: 80%; padding: 5px;"
+          />
+          <button id="snippetSearchButton" style="width: 18%;">Search</button>
+        </div>
           <button id="back">🔙 Back to Workspaces</button>
         </div>
 
@@ -358,7 +374,8 @@ pre {
         const nameDiv = document.createElement('div');
         nameDiv.className = 'workspace-name';
         nameDiv.innerText = ws.name;
-        nameDiv.onclick = () => vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId });
+        nameDiv.onclick = () => {window.currentWorkspaceId = ws.workspaceId;
+        vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId })};
         const addBtn = document.createElement('button');
         addBtn.className = 'add-btn';
         addBtn.innerText = "➕";
@@ -372,9 +389,9 @@ pre {
         delBtn.className = 'delete-btn';
         delBtn.innerText = "🗑️";
         delBtn.onclick = () => vscode.postMessage({ command: 'deleteWorkspace', workspaceId: ws.workspaceId, workspaceName: ws.name });
-        container.appendChild(nameDiv);
         container.appendChild(addBtn);
         container.appendChild(delBtn);
+        container.appendChild(nameDiv);
         list.appendChild(container);
       });
     }
@@ -398,6 +415,21 @@ pre {
         \`;
         list.appendChild(card);
       });
+      const searchButton = document.getElementById('snippetSearchButton');
+      const searchInput = document.getElementById('snippetSearchInput');
+
+      searchButton.addEventListener('click', () => {
+        const query = searchInput.value.trim();
+        // 🔥 Grab the stored workspace ID
+        const workspaceId = window.currentWorkspaceId;
+
+        vscode.postMessage({
+          command: 'searchSnippets',
+          workspaceId,
+          query
+        });
+});
+
     }
     if (message.type === 'error') {
       document.getElementById('error').innerText = message.payload;
@@ -449,6 +481,21 @@ pre {
   document.getElementById('createWorkspace').addEventListener('click', () => {
     vscode.postMessage({ command: 'createWorkspace' });
   });
+
+  // Search Snippets
+  const searchButton = document.getElementById('snippetSearchButton');
+  const searchInput = document.getElementById('snippetSearchInput');
+
+  searchButton.addEventListener('click', () => {
+    const query = searchInput.value.trim();
+    // We retrieve the workspaceId from a global variable or from your snippet payload
+    vscode.postMessage({
+      command: 'searchSnippets',
+      workspaceId: window.currentWorkspaceId, // or however you store it
+      query
+    });
+  });
+
 </script>
 
       </body>

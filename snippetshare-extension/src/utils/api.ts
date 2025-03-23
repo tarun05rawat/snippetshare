@@ -147,3 +147,28 @@ export async function createSnippet(token: string, snippet: SnippetPayload) {
 
   return await response.json();
 }
+
+// Search snippets API
+export async function searchSnippets(
+  token: string,
+  workspaceId: string,
+  query: string
+) {
+  const url = `${BACKEND_URL}/api/snippets/search?workspace=${workspaceId}&query=${encodeURIComponent(
+    query
+  )}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const data = (await response.json()) as { error?: string };
+    throw new Error(data.error || "Search failed");
+  }
+
+  return await response.json();
+}

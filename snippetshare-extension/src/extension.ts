@@ -6,6 +6,7 @@ import {
   fetchSnippets,
   createWorkspace,
   addMembersToWorkspace,
+  searchSnippets,
 } from "./utils/api";
 import type { Snippet } from "./webviews/SnippetPanel";
 
@@ -135,6 +136,29 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.searchSnippets",
+      async (workspaceId: string, query: string) => {
+        if (!firebaseToken) {
+          vscode.window.showErrorMessage("⚠️ Not authenticated!");
+          return;
+        }
+
+        try {
+          const results = (await searchSnippets(
+            firebaseToken,
+            workspaceId,
+            query
+          )) as Snippet[];
+          panel.showSnippets(results);
+        } catch (err: any) {
+          vscode.window.showErrorMessage(`❌ Search failed: ${err.message}`);
+        }
+      }
+    )
+  );
+
   // Handle login/signup success
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -157,6 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
+  // Handle workspace selection
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "snippetshare.workspaceSelected",

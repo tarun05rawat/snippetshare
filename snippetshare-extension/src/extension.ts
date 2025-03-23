@@ -102,6 +102,29 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.window.showInformationMessage("👋 Logged out!");
     })
   );
+
+  // Handle back to workspaces
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.backToWorkspaces",
+      async () => {
+        if (!firebaseToken) {
+          vscode.window.showErrorMessage("⚠️ Not authenticated!");
+          return;
+        }
+        try {
+          const workspaces = await fetchWorkspaces(firebaseToken);
+          await panel.showWorkspaces(workspaces);
+          vscode.window.showInformationMessage("📂 Returned to workspaces.");
+        } catch (err: any) {
+          await panel.showError(err.message || "Failed to reload workspaces.");
+          vscode.window.showErrorMessage(
+            `Error reloading workspaces: ${err.message}`
+          );
+        }
+      }
+    )
+  );
 }
 
 export function deactivate() {}

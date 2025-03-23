@@ -126,8 +126,7 @@ def get_workspaces():
     return jsonify(result), 200
 
 
-
-# Get all snippets for a workspace
+# Get Snippets in a workspace
 @app.route("/api/snippets", methods=["GET"])
 @firebase_token_required
 def get_snippets():
@@ -137,7 +136,7 @@ def get_snippets():
     if not workspace_id:
         return jsonify({"error": "workspace query param is required"}), 400
 
-    # Verify the user is a member of the workspace
+    # Verify user is a member of the workspace
     workspace_ref = db.collection("workspaces").document(workspace_id)
     workspace_doc = workspace_ref.get()
     if not workspace_doc.exists:
@@ -150,62 +149,79 @@ def get_snippets():
     # Fetch all snippets in this workspace
     snippets_ref = db.collection("snippets").where("workspaceId", "==", workspace_id)
     snippets = snippets_ref.stream()
-    result = [snippet.to_dict() for snippet in snippets]
+
+    result = []
+    uids_to_lookup = set()
+    snippets_list = []
+
+    for snap in snippets:
+        snippet_data = snap.to_dict()
+        created_by = snippet_data.get("createdBy")
+
+        # Ensure we always extract just the uid string
+        if isinstance(created_by, dict):
+            created_by_uid = created_by.get("uid")
+        elif isinstance(created_by, str):
+            created_by_uid = created_by
+        else:
+            created_by_uid = None
+
+        if created_by_uid:
+            uids_to_lookup.add(created_by_uid)
+
+        snippet_data["__created_by_uid"] = created_by_uid
+        snippets_list.append(snippet_data)
+
+    # Batch fetch all user emails via Firebase Admin
+    user_records = {}
+    if uids_to_lookup:
+        for uid in uids_to_lookup:
+            try:
+                user = firebase_auth.get_user(uid)
+                user_records[uid] = user.email
+            except Exception as e:
+                user_records[uid] = "unknown@user"
+
+    # Replace UID with email
+    for snippet in snippets_list:
+        uid = snippet.get("__created_by_uid")
+        snippet["createdBy"] = user_records.get(uid, "unknown@user")
+        snippet.pop("__created_by_uid", None)
+        result.append(snippet)
 
     return jsonify(result), 200
 
 
-# Create a snippet in a workspace
+# Create a snippet
 @app.route("/api/snippets", methods=["POST"])
 @firebase_token_required
 def create_snippet():
+    user_uid = request.user["uid"]
+
     data = request.get_json()
-    workspace_name = data.get("workspaceName")  # Expecting workspace name from the request
-    title = data.get("title")
-    tags = data.get("tags", [])
-    language = data.get("language")
-    code = data.get("code")
-    
-    # Validate required fields
-    if not workspace_name:
-        return jsonify({"error": "Workspace name is required"}), 400
-    if not title or not code:
-        return jsonify({"error": "Title and code are required"}), 400
+    required_fields = ["title", "code", "workspaceId", "workspaceName"]
 
-    # Query Firestore for the workspace with the given name
-    # and ensure the authenticated user is a member.
-    workspaces_query = db.collection("workspaces").where("name", "==", workspace_name)
-    workspace_doc = None
-    for ws in workspaces_query.stream():
-        ws_data = ws.to_dict()
-        if request.user["uid"] in ws_data.get("members", []):
-            workspace_doc = ws
-            break
+    # Basic validation
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"error": f"{field} is required"}), 400
 
-    if not workspace_doc:
-        return jsonify({"error": "Workspace not found or you are not a member"}), 404
-
-    # Use the workspace's document ID as the association
-    workspace_id = workspace_doc.id
-
-    # Create snippet data payload
-    snippet_data = {
-        "workspaceId": workspace_id,
-        "title": title,
-        "tags": tags,
-        "language": language,
-        "code": code,
-        "createdBy": {
-            "uid": request.user.get("uid"),
-            "email": request.user.get("email")  # ✅ Add email
-        },
-        "createdAt": firestore.SERVER_TIMESTAMP
+    snippet = {
+        "title": data.get("title").strip(),
+        "code": data.get("code"),
+        "tags": data.get("tags") or [],
+        "workspaceId": data.get("workspaceId"),
+        "workspaceName": data.get("workspaceName"),
+        "createdBy": user_uid,  # Only store UID here ✅
+        "createdAt": firestore.SERVER_TIMESTAMP,
     }
-    doc_ref = db.collection("snippets").document()
-    snippet_data["snippetId"] = doc_ref.id
-    doc_ref.set(snippet_data)
 
-    return jsonify({"snippetId": doc_ref.id}), 201
+    doc_ref = db.collection("snippets").document()
+    snippet["snippetId"] = doc_ref.id
+    doc_ref.set(snippet)
+
+    return jsonify({"message": "Snippet created!", "snippetId": doc_ref.id}), 201
+
 
 
 #Add Member to Workspace

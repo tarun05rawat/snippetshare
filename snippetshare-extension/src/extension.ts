@@ -1,56 +1,74 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import { createSnippetCommand } from './commands/createSnippet';
-import { SnippetProvider } from './tree/snippetProvider';
-import { SnippetPanel } from './webviews/SnippetPanel';
+import * as vscode from "vscode";
+import { createSnippetCommand } from "./commands/createSnippet";
+import { SnippetPanel } from "./webviews/SnippetPanel";
+import { fetchWorkspaces } from "./utils/api";
 
+// 🔑 Temporary token store (global)
+export let firebaseToken: string | undefined;
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "snippetshare" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('snippetshare.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from SnippetShare!');
-	});
-	context.subscriptions.push(
-		vscode.commands.registerCommand('snippetshare.createSnippet', createSnippetCommand)
-	  );
-	  const snippetProvider = new SnippetProvider();
-	  context.subscriptions.push(
-		vscode.window.registerTreeDataProvider('snippetExplorer', snippetProvider)
-	  );	  
-	  context.subscriptions.push(
-		vscode.commands.registerCommand('snippetshare.insertSnippet', (code: string) => {
-		  const editor = vscode.window.activeTextEditor;
-		  if (editor) {
-			editor.edit(editBuilder => {
-			  editBuilder.insert(editor.selection.active, code);
-			});
-		  } else {
-			vscode.window.showErrorMessage('No active text editor found.');
-		  }
-		})
-	  );
-	  context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(
-		  SnippetPanel.viewType,
-		  new SnippetPanel(context)
-		)
-	  );
-	  
-	  
-	  
+export function setFirebaseToken(token: string) {
+  firebaseToken = token;
+  vscode.window.showInformationMessage("🔑 Firebase token saved!");
 }
 
-// This method is called when your extension is deactivated
+export function getFirebaseToken(): string | undefined {
+  return firebaseToken;
+}
+
+export function activate(context: vscode.ExtensionContext) {
+  console.log("🎉 SnippetShare extension is now active!");
+
+  // Register create snippet command (Ctrl/Cmd + Alt + S)
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.createSnippet",
+      createSnippetCommand
+    )
+  );
+
+  // Register "insert snippet" command
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.insertSnippet",
+      (code: string) => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          editor.edit((editBuilder) => {
+            editBuilder.insert(editor.selection.active, code);
+          });
+        } else {
+          vscode.window.showErrorMessage("No active text editor found.");
+        }
+      }
+    )
+  );
+
+  // Register SnippetPanel (right-side webview)
+  const panel = new SnippetPanel(context);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(SnippetPanel.viewType, panel)
+  );
+
+  // Listen to the custom command fired by SnippetPanel webview
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.handleAuth",
+      async (token: string) => {
+        setFirebaseToken(token);
+
+        try {
+          const workspaces = await fetchWorkspaces();
+          vscode.window.showInformationMessage(
+            `✅ Authenticated! Found ${workspaces.length} workspaces.`
+          );
+        } catch (err: any) {
+          vscode.window.showErrorMessage(
+            `Error fetching workspaces: ${err.message}`
+          );
+        }
+      }
+    )
+  );
+}
+
 export function deactivate() {}

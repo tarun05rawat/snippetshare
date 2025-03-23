@@ -1,7 +1,12 @@
 import * as vscode from "vscode";
 import { createSnippetCommand } from "./commands/createSnippet";
 import { SnippetPanel } from "./webviews/SnippetPanel";
-import { fetchWorkspaces, fetchSnippets, createWorkspace } from "./utils/api";
+import {
+  fetchWorkspaces,
+  fetchSnippets,
+  createWorkspace,
+  addMembersToWorkspace,
+} from "./utils/api";
 import type { Snippet } from "./webviews/SnippetPanel";
 
 // 🔑 Temporary token store (global)
@@ -89,6 +94,41 @@ export function activate(context: vscode.ExtensionContext) {
         } catch (err: any) {
           vscode.window.showErrorMessage(
             `❌ Failed to create workspace: ${err.message}`
+          );
+        }
+      }
+    )
+  );
+
+  // Add Members to Workspace
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "snippetshare.addMember",
+      async (workspaceId: string, workspaceName: string) => {
+        if (!firebaseToken) {
+          vscode.window.showErrorMessage("⚠️ Not authenticated!");
+          return;
+        }
+
+        const input = await vscode.window.showInputBox({
+          prompt: `Add member(s) to "${workspaceName}" (comma-separated emails)`,
+          ignoreFocusOut: true,
+        });
+
+        if (!input) {
+          return;
+        }
+
+        const emails = input.split(",").map((e) => e.trim());
+
+        try {
+          await addMembersToWorkspace(firebaseToken, workspaceId, emails);
+          vscode.window.showInformationMessage(
+            `✅ Added member(s) to "${workspaceName}"`
+          );
+        } catch (err: any) {
+          vscode.window.showErrorMessage(
+            `❌ Failed to add members: ${err.message}`
           );
         }
       }

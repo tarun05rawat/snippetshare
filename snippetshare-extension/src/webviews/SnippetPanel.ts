@@ -69,6 +69,12 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
           message.workspaceId,
           message.workspaceName
         );
+      } else if (message.command === "addMember") {
+        vscode.commands.executeCommand(
+          "snippetshare.addMember",
+          message.workspaceId,
+          message.workspaceName
+        );
       }
     });
 
@@ -329,11 +335,21 @@ h2 {
         nameDiv.className = 'workspace-name';
         nameDiv.innerText = ws.name;
         nameDiv.onclick = () => vscode.postMessage({ command: 'workspaceSelected', workspaceId: ws.workspaceId });
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-btn';
+        addBtn.innerText = "➕";
+        addBtn.title = "Add Members";
+        addBtn.onclick = () => vscode.postMessage({
+          command: 'addMember',
+          workspaceId: ws.workspaceId,
+          workspaceName: ws.name
+        });
         const delBtn = document.createElement('button');
         delBtn.className = 'delete-btn';
         delBtn.innerText = "🗑️";
         delBtn.onclick = () => vscode.postMessage({ command: 'deleteWorkspace', workspaceId: ws.workspaceId, workspaceName: ws.name });
         container.appendChild(nameDiv);
+        container.appendChild(addBtn);
         container.appendChild(delBtn);
         list.appendChild(container);
       });

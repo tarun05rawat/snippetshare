@@ -80,6 +80,33 @@ export async function deleteWorkspace(token: string, workspaceId: string) {
   return await response.json();
 }
 
+// Add member to workspace API
+export async function addMembersToWorkspace(
+  token: string,
+  workspaceId: string,
+  members: string[]
+) {
+  const response = await fetch(
+    `${BACKEND_URL}/api/workspaces/${workspaceId}/members/add`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ members }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorResponse = await response.json();
+    const error = errorResponse as { error: string };
+    throw new Error(error.error || "Unknown error while adding members.");
+  }
+
+  return await response.json();
+}
+
 // Fetch snippets API
 export async function fetchSnippets(token: string, workspaceId: string) {
   const response = await fetch(

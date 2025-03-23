@@ -234,7 +234,7 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
         try {
-          const snippets = await fetchSnippets(firebaseToken, workspaceId); // FIXED here!
+          const snippets = await fetchSnippets(firebaseToken, workspaceId);
           if (Array.isArray(snippets)) {
             await panel.showSnippets(snippets as Snippet[]);
           } else {

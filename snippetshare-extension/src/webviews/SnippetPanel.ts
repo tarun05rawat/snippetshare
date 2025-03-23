@@ -669,6 +669,7 @@ pre {
     }
     if (message.type === 'logout') {
       document.getElementById('authView').classList.remove('hidden');
+      document.getElementById('authView').style.display = 'flex';
       document.getElementById('workspaceView').classList.add('hidden');
       document.getElementById('snippetView').classList.add('hidden');
     }

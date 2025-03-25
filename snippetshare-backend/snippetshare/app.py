@@ -5,8 +5,6 @@ from functools import wraps
 import datetime
 from flask_cors import CORS
 
-
-
 app = Flask(__name__)
 CORS(app)  # <-- Allow all origins (or customize)
 

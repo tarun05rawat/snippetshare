@@ -1,15 +1,16 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
+import json
 
-# Path to your service account key file
-SERVICE_ACCOUNT_PATH = os.path.join(
-    os.path.dirname(__file__), '../../snippetshare-service-account.json'
-)
+# Load service account JSON from the environment variable
+creds_json = os.getenv("GOOGLE_CREDS")
+if not creds_json:
+    raise Exception("Missing GOOGLE_CREDS environment variable")
 
 # Initialize Firebase Admin SDK (only once)
 if not firebase_admin._apps:
-    cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+    cred = credentials.Certificate(json.loads(creds_json))
     firebase_admin.initialize_app(cred)
 
 # Get Firestore client instance

@@ -27,10 +27,10 @@
 
 ## 📸 Screenshots
 
-![Login View](screenshots/snippetshare-auth.JPEG "Login Screen")
+![Login View](https://github.com/tarun05rawat/snippetshare/blob/main/snippetshare-extension/screenshots/snippetshare-auth.JPEG?raw=true "Login Screen")
 
-![Workspace View](screenshots/snippetshare-workspaces.png "Workspaces View")
+![Workspace View](https://github.com/tarun05rawat/snippetshare/blob/main/snippetshare-extension/screenshots/snippetshare-workspaces.png?raw=true "Workspaces View")
 
-![Code Snippets View](screenshots/snippetshare-codesnippets.png "Code Snippets View")
+![Code Snippets View](https://github.com/tarun05rawat/snippetshare/blob/main/snippetshare-extension/screenshots/snippetshare-codesnippets.png?raw=true "Code Snippets View")
 
 ---

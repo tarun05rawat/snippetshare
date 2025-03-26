@@ -1,85 +1,41 @@
-🧩 SnippetShare — VS Code Extension
-SnippetShare is a collaborative code snippet manager designed for students and small dev teams — right inside your VS Code editor.
+# 🧩 SnippetShare — VS Code Extension
 
-🚀 Features
-✅ Log in & Sign Up
-Secure authentication via Firebase.
+**SnippetShare** is a collaborative snippet manager built into VS Code that lets developers save, search, organize, and share code snippets with their teams in real-time. It’s designed for students, open-source contributors, and small engineering teams looking to keep their shared knowledge in one place — right inside their IDE.
 
-✅ Create & Share Snippets
-Easily add code snippets with titles, tags, and language. Snippets are saved to the cloud and accessible from anywhere.
+---
 
-✅ Organized Workspaces
-Group snippets into workspaces — whether private or shared — to stay organized and collaborate efficiently.
+## ✨ Features
 
-✅ Real-time Sync
-All snippets are backed by a live Flask backend and stored in Firebase Firestore.
+- 🔐 **Firebase Authentication**
+  - Secure Sign Up & Log In using Firebase Auth
+- 🧠 **Smart Workspace System**
+  - Group snippets by workspace (e.g. `frontend`, `backend`, `algorithms`)
+  - Create private or custom-shared workspaces
+- 📝 **Code Snippet Creation**
+  - Add title, code, language, tags, and associate it with a workspace
+- 🔄 **Real-Time Data Sync**
+  - All changes are instantly saved to Firestore via a Flask backend hosted on Render
+- 👥 **Collaborative Sharing**
+  - Invite teammates by email (using Firebase Admin SDK under the hood)
+  - Snippets show their creator’s email for easy attribution
+- 🔍 **Powerful Search**
+  - Search snippets by title, tag, or code content across workspaces
+- 🖥️ **Full Webview-based Interface**
+  - Built with React and styled to match VS Code aesthetics
 
-✅ User Attribution
-Snippets display their original creator, making collaboration transparent and clear.
+---
 
-🧪 Powered By
-VS Code Extension API
+## 📸 Screenshots
 
-React (Webview UI)
+![login screen](~/Downloads/snippetshare-auth.JPEG "Login Screen")
 
-Flask (Render-deployed backend)
+---
 
-Firebase Auth + Firestore
+## 🔧 Setup Instructions (Local Dev)
 
-Firebase Admin SDK
+### 1. Clone the Repository
 
-Secure environment variable config for production
-
-🛠 Setup (for local development)
-Clone the repo.
-
-Set your backend URL in api.ts or equivalent.
-
-Install dependencies:
-
-bash
-Copy
-Edit
-npm install
-Build the extension:
-
-bash
-Copy
-Edit
-npm run build
-Launch the extension in a VS Code dev instance:
-
-bash
-Copy
-Edit
-code .
-🌐 Backend Deployment
-Deployed on Render
-
-Environment variable GOOGLE_CREDS holds the Firebase service account
-
-Exposes routes like:
-
-POST /signup
-
-POST /login
-
-GET /api/snippets
-
-POST /api/workspaces
-
-…and more
-
-📦 Extension Marketplace Link
-➡️ Install on Visual Studio Marketplace
-
-(replace yourpublisher.snippetshare with your real identifier)
-
-🤝 Ideal For
-College project teams
-
-Hackathon collabs
-
-Internal dev tooling for small startups
-
-Devs tired of scattered code snippets!
+```bash
+git clone https://github.com/yourusername/snippetshare.git
+cd snippetshare/snippetshare-extension
+```

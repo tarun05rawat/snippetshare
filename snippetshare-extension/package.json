@@ -7,7 +7,7 @@
     "url": "https://github.com/tarun05rawat/snippetshare"
   },
   "publisher": "snippet-share",
-  "version": "0.0.3",
+  "version": "4",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -38,7 +38,7 @@
         {
           "id": "snippetshareSidebar",
           "title": "SnippetShare",
-          "icon": "resources/snippet-icon.svg"
+          "icon": "resources/snippetshare-logo.png"
         }
       ]
     },

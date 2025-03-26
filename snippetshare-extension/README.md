@@ -34,12 +34,3 @@
 ![Code Snippets View](screenshots/snippetshare-codesnippets.png "Code Snippets View")
 
 ---
-
-## 🔧 Setup Instructions (Local Dev)
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/yourusername/snippetshare.git
-cd snippetshare/snippetshare-extension
-```

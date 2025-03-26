@@ -27,7 +27,11 @@
 
 ## 📸 Screenshots
 
-![login screen](~/Downloads/snippetshare-auth.JPEG "Login Screen")
+![Login View](screenshots/snippetshare-auth.JPEG "Login Screen")
+
+![Workspace View](screenshots/snippetshare-workspaces.png "Workspaces View")
+
+![Code Snippets View](screenshots/snippetshare-codesnippets.png "Code Snippets View")
 
 ---
 

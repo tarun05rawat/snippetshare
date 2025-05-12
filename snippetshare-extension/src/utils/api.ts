@@ -2,7 +2,7 @@ import { getFirebaseToken } from "../extension";
 
 const BACKEND_URL = "https://snippetshare-flask.onrender.com";
 
-// Define type for workspace (you can expand this later)
+// Define type for workspace (can expand this later)
 interface Workspace {
   workspaceId: string;
   name: string;

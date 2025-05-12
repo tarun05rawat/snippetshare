@@ -3,29 +3,29 @@ import { getFirebaseToken } from "../extension";
 import { fetchWorkspaces, createSnippet } from "../utils/api";
 
 export async function createSnippetCommand() {
-  const token = getFirebaseToken();
+  const token = getFirebaseToken(); // get the token from the firebase
   if (!token) {
     vscode.window.showErrorMessage(
       "⚠️ You must be logged in to create a snippet."
     );
     return;
-  }
+  } // check if user is logged in
 
-  const editor = vscode.window.activeTextEditor;
+  const editor = vscode.window.activeTextEditor; // get the active editor
   if (!editor) {
     vscode.window.showErrorMessage("⚠️ No active editor found.");
     return;
-  }
+  } // check if editor is open
 
   const selectedCode = editor.document.getText(editor.selection);
   if (!selectedCode || selectedCode.trim() === "") {
     vscode.window.showWarningMessage("⚠️ No code selected.");
     return;
-  }
+  } // check if code is selected
 
   const title = await vscode.window.showInputBox({
     prompt: "Enter a title for your snippet",
-    ignoreFocusOut: true,
+    ignoreFocusOut: true, // keep the input box open
     validateInput: (value) => (value.trim() ? null : "Title cannot be empty."),
   });
   if (!title) {
@@ -37,7 +37,7 @@ export async function createSnippetCommand() {
     ignoreFocusOut: true,
   });
 
-  let workspacePick;
+  let workspacePick; // variable to store the selected workspace
   try {
     const workspaces = await fetchWorkspaces(token);
     if (!workspaces || workspaces.length === 0) {
@@ -48,6 +48,7 @@ export async function createSnippetCommand() {
     }
 
     workspacePick = await vscode.window.showQuickPick(
+      // show a quick pick dialog and awaits for the user to select a workspace
       workspaces.map((ws) => ({ label: ws.name, description: ws.workspaceId })),
       { placeHolder: "Select a workspace" }
     );

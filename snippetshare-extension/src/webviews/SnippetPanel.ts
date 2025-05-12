@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-
 export type Workspace = {
   workspaceId: string;
   name: string;
@@ -116,14 +115,17 @@ export class SnippetPanel implements vscode.WebviewViewProvider {
   }
 
   private getHtmlForWebview(webview: vscode.Webview): string {
+    const firebaseConfigScript = `
     const firebaseConfig = {
-      apiKey: "AIzaSyDTHKMSTnAEKWDJDX8Suk_8Mi8jDom6lK8",
-      authDomain: "snippetshare-7c73c.firebaseapp.com",
-      projectId: "snippetshare-7c73c",
-      storageBucket: "snippetshare-7c73c.appspot.com",
-      messagingSenderId: "22796622839",
-      appId: "1:22796622839:web:450a0f0ce713b60b94acf2",
+      apiKey: "${process.env.FIREBASE_API_KEY}",
+      authDomain: "${process.env.FIREBASE_AUTH_DOMAIN}",
+      projectId: "${process.env.FIREBASE_PROJECT_ID}",
+      storageBucket: "${process.env.FIREBASE_STORAGE_BUCKET}",
+      messagingSenderId: "${process.env.FIREBASE_MESSAGING_SENDER_ID}",
+      appId: "${process.env.FIREBASE_APP_ID}"
     };
+    firebase.initializeApp(firebaseConfig);
+  `;
 
     return /* html */ `
       <!DOCTYPE html>
@@ -554,15 +556,10 @@ pre {
           </div>
         </div>
 
-        <script nonce="${
-          this.nonce
-        }" src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script nonce="${
-      this.nonce
-    }" src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+        <script nonce="${this.nonce}" src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script nonce="${this.nonce}" src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script nonce="${this.nonce}">
-  const firebaseConfig = ${JSON.stringify(firebaseConfig)};
-  firebase.initializeApp(firebaseConfig);
+  ${firebaseConfigScript}
   const vscode = acquireVsCodeApi();
 
   // Handle messages from extension

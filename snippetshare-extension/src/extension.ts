@@ -24,8 +24,6 @@ export function getFirebaseToken(): string | undefined {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("🎉 SnippetShare extension is now active!");
-
   const panel = new SnippetPanel(context);
 
   // Register SnippetPanel view
@@ -71,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         const name = await vscode.window.showInputBox({
           prompt: "Enter a name for your workspace",
-          ignoreFocusOut: true,
+          ignoreFocusOut: true, // keep the input box open
           validateInput: (value) =>
             value.trim() ? null : "Workspace name cannot be empty.",
         });
@@ -121,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
 
-        const emails = input.split(",").map((e) => e.trim());
+        const emails = input.split(",").map((e) => e.trim()); // Split by comma and trim whitespace
 
         try {
           await addMembersToWorkspace(firebaseToken, workspaceId, emails);
